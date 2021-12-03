@@ -1,0 +1,44 @@
+spring:
+  application:
+    name: good-food
+  cloud:
+    stream:
+      bindings:
+        order-producer:
+          destination: order-out-v1
+        order-consumer:
+          destination: order-in-v1
+          contentType: application/json
+          group: ${spring.application.name}
+  http:
+    log-request-details: true
+  jackson:
+    date-format: yyyy-MM-dd'T'HH:mm:ss.SSS
+    default-property-inclusion: NON_NULL
+    mapper:
+      accept-case-insensitive-properties: true
+    deserialization:
+      fail-on-unknown-properties: false
+    time-zone: America/Sao_Paulo
+
+logging:
+  level:
+    io:
+      good:
+        food: DEBUG
+  pattern:
+    console: "[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%X{traceId}] [%t] %c{1} - %msg%n"
+
+springdoc:
+  swagger-ui:
+    displayRequestDuration: true
+    groupsOrder: DESC
+    docExpansion: none
+    operationsSorter: alpha
+
+management:
+  health:
+    defaults:
+      enabled: false
+    binders:
+      enabled: false

@@ -1,0 +1,87 @@
+plugins {
+    id 'org.springframework.boot' version '2.2.10.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'java'
+    id 'idea'
+    id 'jacoco'
+}
+
+apply from: "dependencies.gradle"
+
+jacoco {
+    toolVersion = "0.8.4"
+}
+
+group = 'good-food'
+version = '1.0.0'
+
+sourceCompatibility = JavaVersion.VERSION_11
+targetCompatibility = JavaVersion.VERSION_11
+
+repositories {
+    mavenCentral()
+}
+
+task sourceJar(type: Jar) {
+    archiveClassifier = 'sources'
+    from sourceSets.main.allJava
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+    options.compilerArgs += '-proc:none'
+}
+
+task version {
+    doLast {
+        logger.quiet project.version as String
+    }
+}
+
+test {
+    useJUnitPlatform()
+    finalizedBy(jacocoTestReport)
+    dependsOn 'cleanTest'
+}
+
+tasks.withType(Test) {
+    testLogging {
+        events 'passed', 'skipped', 'failed'
+        exceptionFormat "full"
+
+        afterSuite { desc, r ->
+            if (!desc.parent) {
+                def output = "${r.resultType} (${r.testCount} tests, ${r.successfulTestCount} successes, ${r.failedTestCount} failures, ${r.skippedTestCount} skipped)"
+                def startItem = '| ', endItem = ' |'
+                def repeatLength = startItem.length() + output.length() + endItem.length()
+                println('\n' + ('-' * repeatLength) + '\n' + startItem + output + endItem + '\n' + ('-' * repeatLength))
+            }
+        }
+    }
+}
+
+def testExclusion = ["**/*Application.*", "**/configuration/**", "**/dto/**", "**/exception/**", "**/entity/**", "**/processor/channel/**", "**/test/**"]
+
+tasks.register('jacocoTestReportLocal') {
+    group 'verification'
+    dependsOn 'clean'
+    dependsOn 'test'
+    tasks.findByName('test').mustRunAfter 'clean'
+    tasks.findByName('jacocoTestReport').mustRunAfter 'test'
+}
+
+jacocoTestReport {
+    doLast {
+        println("file://${project.rootDir}/build/reports/jacoco/test/html/index.html")
+    }
+
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: testExclusion)
+        }))
+    }
+
+    reports {
+        xml.enabled true
+    }
+}

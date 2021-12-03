@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: good-food
+  data:
+    mongodb:
+      database: good_food_db
+      port: 0
+  cloud:
+    stream:
+      kafka:
+        binder:
+          autoCreateTopics: true
+  main:
+    allow-bean-definition-overriding: true
+  http:
+    log-request-details: true
+  jackson:
+    date-format: yyyy-MM-dd'T'HH:mm:ss.SSS
+    default-property-inclusion: NON_NULL
+    mapper:
+      accept-case-insensitive-properties: true
+    deserialization:
+      fail-on-unknown-properties: false
+    time-zone: America/Sao_Paulo
+
+logging:
+  level:
+    org:
+      apache:
+        http:
+          wire: ERROR
+    com:
+      github:
+        tomakehurst:
+          wiremock: ERROR
+    wiremock:
+      org: ERROR
+    WireMock: ERROR
